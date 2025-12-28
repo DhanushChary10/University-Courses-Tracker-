@@ -38,6 +38,16 @@ def delete_course(course_id):
 # ---------- DASH APP ----------
 app = Dash(__name__)
 
+def graph_style(fig, title):
+    fig.update_layout(
+        title=dict(text=title, x=0.5, font=dict(size=18)),
+        paper_bgcolor="#F4F6FA",
+        plot_bgcolor="#FFFFFF",
+        height=320,
+        margin=dict(l=30, r=30, t=60, b=40),
+    )
+    return fig
+
 app.layout = html.Div(
     style={
         "backgroundColor": "#ECEFF1",
@@ -52,138 +62,64 @@ app.layout = html.Div(
             style={"textAlign": "center", "fontWeight": "bold"},
         ),
 
-        # -------- KPI CARDS --------
-        html.Div(
-            style={"display": "flex", "gap": "20px", "marginBottom": "20px"},
-            children=[
-
-                html.Div(
-                    style={
-                        "backgroundColor": "#4CAF50",
-                        "color": "white",
-                        "padding": "20px",
-                        "borderRadius": "12px",
-                        "width": "33%",
-                        "textAlign": "center",
-                    },
-                    children=[
-                        html.H4("Total Courses"),
-                        html.H2(id="kpi_courses"),
-                    ],
-                ),
-
-                html.Div(
-                    style={
-                        "backgroundColor": "#2196F3",
-                        "color": "white",
-                        "padding": "20px",
-                        "borderRadius": "12px",
-                        "width": "33%",
-                        "textAlign": "center",
-                    },
-                    children=[
-                        html.H4("Total Instructors"),
-                        html.H2(id="kpi_instructors"),
-                    ],
-                ),
-
-                html.Div(
-                    style={
-                        "backgroundColor": "#FF9800",
-                        "color": "white",
-                        "padding": "20px",
-                        "borderRadius": "12px",
-                        "width": "33%",
-                        "textAlign": "center",
-                    },
-                    children=[
-                        html.H4("Average Credits"),
-                        html.H2(id="kpi_avg"),
-                    ],
-                ),
-            ],
-        ),
-
         dcc.Interval(id="interval", interval=5000, n_intervals=0),
 
-        # -------- ADD COURSE --------
+        # ---------- ADD COURSE ----------
         html.Div(
             style={
                 "backgroundColor": "white",
                 "padding": "15px",
                 "borderRadius": "10px",
-                "marginBottom": "15px",
+                "marginBottom": "25px",
             },
             children=[
-                html.H3("Add New Course"),
+                html.H3("Add New Course", style={"fontWeight": "bold"}),
                 dcc.Input(id="code", placeholder="Course Code"),
                 dcc.Input(id="name", placeholder="Course Name"),
                 dcc.Input(id="inst", placeholder="Instructor"),
                 dcc.Input(id="credits", placeholder="Credits", type="number"),
+                html.Br(),
                 html.Br(),
                 html.Button("Add Course", id="add_btn"),
                 html.Div(id="add_msg", style={"color": "green"}),
             ],
         ),
 
-        # -------- CHARTS --------
-        html.Div(
-            style={"display": "flex", "gap": "15px"},
-            children=[
-                dcc.Graph(id="bar_chart", style={"width": "50%", "height": "350px"}),
-                dcc.Graph(id="pie_chart", style={"width": "50%", "height": "350px"}),
-            ],
-        ),
+        # ---------- ROW 1 ----------
+        html.Div(style={"display": "flex", "gap": "25px", "marginBottom": "25px"}, children=[
+            dcc.Graph(id="bar_chart", style={"width": "50%"}),
+            dcc.Graph(id="pie_chart", style={"width": "50%"}),
+        ]),
 
-        # -------- EXTRA GRAPH --------
+        # ---------- ROW 2 ----------
+        html.Div(style={"display": "flex", "gap": "25px", "marginBottom": "25px"}, children=[
+            dcc.Graph(id="instructor_bar", style={"width": "50%"}),
+            dcc.Graph(id="credit_hist", style={"width": "50%"}),
+        ]),
+
+        # ---------- ROW 3 ----------
+        html.Div(style={"display": "flex", "gap": "25px", "marginBottom": "25px"}, children=[
+            dcc.Graph(id="top_courses", style={"width": "50%"}),
+            dcc.Graph(id="avg_inst", style={"width": "50%"}),
+        ]),
+
+        # ---------- TABLE ----------
         html.Div(
             style={
                 "backgroundColor": "white",
-                "padding": "20px",
-                "borderRadius": "12px",
-                "marginTop": "20px",
+                "padding": "15px",
+                "borderRadius": "10px",
             },
             children=[
-                html.H3("Courses per Instructor"),
-                dcc.Graph(id="instructor_bar"),
-            ],
-        ),
-
-        html.Br(),
-
-        # -------- TABLES --------
-        html.Div(
-            style={"display": "flex", "gap": "20px"},
-            children=[
-
-                html.Div(
-                    style={"width": "60%", "backgroundColor": "white", "padding": "15px", "borderRadius": "10px"},
-                    children=[
-                        html.H3("Course Details"),
-                        dash_table.DataTable(
-                            id="course_table",
-                            editable=True,
-                            row_deletable=True,
-                            page_size=8,
-                            style_table={"height": "300px", "overflowY": "auto"},
-                            style_header={"fontWeight": "bold"},
-                            style_cell={"padding": "8px"},
-                        ),
-                    ],
-                ),
-
-                html.Div(
-                    style={"width": "40%", "backgroundColor": "white", "padding": "15px", "borderRadius": "10px"},
-                    children=[
-                        html.H3("Instructor Summary"),
-                        dash_table.DataTable(
-                            id="instructor_table",
-                            page_size=8,
-                            style_table={"height": "300px", "overflowY": "auto"},
-                            style_header={"fontWeight": "bold"},
-                            style_cell={"padding": "8px"},
-                        ),
-                    ],
+                html.H3("Course Details", style={"fontWeight": "bold"}),
+                dash_table.DataTable(
+                    id="course_table",
+                    editable=True,
+                    row_deletable=True,
+                    page_size=8,
+                    style_table={"height": "300px", "overflowY": "auto"},
+                    style_header={"fontWeight": "bold"},
+                    style_cell={"padding": "8px"},
                 ),
             ],
         ),
@@ -195,70 +131,69 @@ app.layout = html.Div(
     [
         Output("bar_chart", "figure"),
         Output("pie_chart", "figure"),
+        Output("instructor_bar", "figure"),
+        Output("credit_hist", "figure"),
+        Output("top_courses", "figure"),
+        Output("avg_inst", "figure"),
         Output("course_table", "data"),
         Output("course_table", "columns"),
-        Output("instructor_table", "data"),
-        Output("instructor_table", "columns"),
-        Output("kpi_courses", "children"),
-        Output("kpi_instructors", "children"),
-        Output("kpi_avg", "children"),
-        Output("instructor_bar", "figure"),
     ],
     Input("interval", "n_intervals"),
 )
 def update_dashboard(n):
     df = get_data()
-
     if df.empty:
-        return {}, {}, [], [], [], [], 0, 0, 0, {}
+        return {}, {}, {}, {}, {}, {}, [], []
 
-    bar = px.bar(
-        df, x="course_name", y="credits",
-        color="credits", color_discrete_map=COLOR_MAP
+    bar = graph_style(
+        px.bar(df, x="course_name", y="credits",
+               color="credits", color_discrete_map=COLOR_MAP),
+        "Credits per Course"
     )
 
-    pie = px.pie(
-        df, names="credits",
-        color="credits", color_discrete_map=COLOR_MAP
+    pie = graph_style(
+        px.pie(df, names="credits",
+               color="credits", color_discrete_map=COLOR_MAP),
+        "Credit Distribution"
     )
 
-    course_columns = [
+    inst = df.groupby("instructor").size().reset_index(name="Courses")
+    instructor_bar = graph_style(
+        px.bar(inst, x="instructor", y="Courses", color="Courses"),
+        "Courses per Instructor"
+    )
+
+    credit_hist = graph_style(
+        px.histogram(df, x="credits", nbins=5),
+        "Credits Frequency"
+    )
+
+    top = df.sort_values("credits", ascending=False).head(5)
+    top_courses = graph_style(
+        px.bar(top, x="course_name", y="credits", color="credits"),
+        "Top 5 High Credit Courses"
+    )
+
+    avg = df.groupby("instructor")["credits"].mean().reset_index()
+    avg_inst = graph_style(
+        px.bar(avg, x="instructor", y="credits", color="credits"),
+        "Average Credits per Instructor"
+    )
+
+    columns = [
         {"name": c, "id": c, "editable": c == "instructor"}
         for c in df.columns
     ]
 
-    summary = df.groupby("instructor").size().reset_index(name="No of Courses")
-    summary.insert(0, "S.No", range(1, len(summary) + 1))
-
-    instructor_columns = [
-        {"name": "S.No", "id": "S.No"},
-        {"name": "Instructor Name", "id": "instructor"},
-        {"name": "No of Courses", "id": "No of Courses"},
-    ]
-
-    total_courses = len(df)
-    total_instructors = df["instructor"].nunique()
-    avg_credits = round(df["credits"].mean(), 2)
-
-    inst_bar = px.bar(
-        summary,
-        x="instructor",
-        y="No of Courses",
-        color="No of Courses",
-        color_continuous_scale="Viridis",
-    )
-
     return (
         bar,
         pie,
+        instructor_bar,
+        credit_hist,
+        top_courses,
+        avg_inst,
         df.to_dict("records"),
-        course_columns,
-        summary.to_dict("records"),
-        instructor_columns,
-        total_courses,
-        total_instructors,
-        avg_credits,
-        inst_bar,
+        columns,
     )
 
 # ---------- HANDLE EDIT & DELETE ----------
@@ -275,8 +210,7 @@ def handle_table_changes(ts, rows, prev_rows):
     current_ids = {r["id"] for r in rows}
     prev_ids = {r["id"] for r in prev_rows}
 
-    deleted = prev_ids - current_ids
-    for cid in deleted:
+    for cid in prev_ids - current_ids:
         delete_course(cid)
 
     for r in rows:
